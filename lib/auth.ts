@@ -28,7 +28,7 @@ export const auth = betterAuth({
                 defaultValue: "seeker",
                 input: true,
                 validator: {
-                    input: signupRoleValidator,
+                     input: signupRoleValidator,
                 },
             }
         }
