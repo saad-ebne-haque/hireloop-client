@@ -7,7 +7,7 @@ import { z } from "zod";
 
 const client = new MongoClient(`${process.env.MONGODB_SECRET_URI}`);
 const db = client.db('hireloop-db');
-const signupRoleValidator = process.env.NODE_ENV === "development"
+const signupRoleValidator = true
     ? z.enum(["seeker", "recruiter", "admin"])
     : z.enum(["seeker", "recruiter"]);
 
