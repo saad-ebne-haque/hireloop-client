@@ -6,6 +6,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { MenuIcon } from "lucide-react"
 
+import { AccountMenu } from "@/components/account-menu"
 import { buttonVariants } from "@/components/ui/button"
 import {
   Sheet,
@@ -15,6 +16,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
@@ -25,7 +27,10 @@ const navLinks = [
 
 export function Navbar() {
   const pathname = usePathname()
+  const { data: session, isPending, error: sessionError } =
+    authClient.useSession()
   const [open, setOpen] = React.useState(false)
+  const user = session?.user
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`)
@@ -78,26 +83,40 @@ export function Navbar() {
               className="mx-6 h-6 w-px bg-white/15 xl:mx-7"
             />
 
-            <div className="flex items-center gap-4">
-              <Link
-                href="/login"
-                className={cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "h-[52px] rounded-xl px-6 text-lg font-semibold text-brand shadow-[inset_0_3px_10px_rgba(255,255,255,0.2)] hover:bg-white/5 hover:text-brand"
-                )}
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                className={cn(
-                  buttonVariants(),
-                  "h-[52px] rounded-xl bg-brand px-6 text-lg font-medium text-brand-foreground hover:bg-brand/90"
-                )}
-              >
-                Get Started
-              </Link>
-            </div>
+            {isPending ? (
+              <div
+                aria-label="Loading account"
+                className="h-11 w-28 animate-pulse rounded-xl bg-white/10"
+                role="status"
+              />
+            ) : user ? (
+              <AccountMenu user={user} />
+            ) : sessionError ? (
+              <span className="text-sm text-white/70" role="alert">
+                Account unavailable
+              </span>
+            ) : (
+              <div className="flex items-center gap-4">
+                <Link
+                  href="/login"
+                  className={cn(
+                    buttonVariants({ variant: "ghost" }),
+                    "h-[52px] rounded-xl px-6 text-lg font-semibold text-brand shadow-[inset_0_3px_10px_rgba(255,255,255,0.2)] hover:bg-white/5 hover:text-brand"
+                  )}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register"
+                  className={cn(
+                    buttonVariants(),
+                    "h-[52px] rounded-xl bg-brand px-6 text-lg font-medium text-brand-foreground hover:bg-brand/90"
+                  )}
+                >
+                  Get Started
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Mobile menu */}
@@ -143,26 +162,47 @@ export function Navbar() {
               </nav>
 
               <div className="mt-auto flex flex-col gap-3 border-t border-white/10 p-5">
-                <Link
-                  href="/login"
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    buttonVariants({ variant: "ghost" }),
-                    "h-12 rounded-xl text-base font-semibold text-brand shadow-[inset_0_3px_10px_rgba(255,255,255,0.2)] hover:bg-white/5 hover:text-brand"
-                  )}
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    buttonVariants(),
-                    "h-12 rounded-xl bg-brand text-base font-medium text-brand-foreground hover:bg-brand/90"
-                  )}
-                >
-                  Get Started
-                </Link>
+                {isPending ? (
+                  <div
+                    aria-label="Loading account"
+                    className="h-12 animate-pulse rounded-xl bg-white/10"
+                    role="status"
+                  />
+                ) : user ? (
+                  <AccountMenu
+                    mobile
+                    onProfileNavigate={() => setOpen(false)}
+                    onSignOutSelect={() => setOpen(false)}
+                    user={user}
+                  />
+                ) : sessionError ? (
+                  <p className="text-center text-sm text-white/70" role="alert">
+                    Account unavailable
+                  </p>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        buttonVariants({ variant: "ghost" }),
+                        "h-12 rounded-xl text-base font-semibold text-brand shadow-[inset_0_3px_10px_rgba(255,255,255,0.2)] hover:bg-white/5 hover:text-brand"
+                      )}
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/register"
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        buttonVariants(),
+                        "h-12 rounded-xl bg-brand text-base font-medium text-brand-foreground hover:bg-brand/90"
+                      )}
+                    >
+                      Get Started
+                    </Link>
+                  </>
+                )}
               </div>
             </SheetContent>
           </Sheet>

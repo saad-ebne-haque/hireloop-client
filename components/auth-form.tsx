@@ -4,6 +4,8 @@ import { useState, type FormEvent } from "react"
 import Link from "next/link"
 import { ArrowRight, BriefcaseBusiness, LockKeyhole, Mail, UserRound } from "lucide-react"
 
+import GoogleLoginBTN from "@/components/socialLogins/google/GoogleLoginBTN"
+
 type AuthFormProps = {
   mode: "login" | "register"
 }
@@ -161,6 +163,14 @@ export function AuthForm({ mode }: AuthFormProps) {
             {status}
           </p>
         </form>
+
+        <div className="my-5 flex items-center gap-3">
+          <span aria-hidden="true" className="h-px flex-1 bg-white/10" />
+          <span className="text-xs font-medium text-white/45">OR</span>
+          <span aria-hidden="true" className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <GoogleLoginBTN />
 
         <p className="mt-3 text-center text-sm text-white/55">
           {isRegister ? "Already have an account?" : "New to HireLoop?"}{" "}

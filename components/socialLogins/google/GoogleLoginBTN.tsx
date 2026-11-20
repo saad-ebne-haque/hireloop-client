@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
+
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
-const GoogleLoginBTN = () => {
+function GoogleLoginBTN() {
 
     const handleGoogleLogin = async () => {
 
@@ -20,11 +22,23 @@ const GoogleLoginBTN = () => {
     }
 
     return (
-        <>
-            <Button onClick={handleGoogleLogin}>Google Login</Button>
-
-        </>
+        <Button
+            className="h-12 w-full rounded-xl border border-white/15 bg-[#202124] text-white hover:bg-[#2a2a2a] hover:text-white dark:bg-[#202124] dark:text-white dark:hover:bg-[#2a2a2a] dark:hover:text-white"
+            onClick={handleGoogleLogin}
+            type="button"
+            variant="ghost"
+        >
+            <Image
+                alt=""
+                aria-hidden="true"
+                className="size-5"
+                height={20}
+                src="/images/google-g-logo.png"
+                width={20}
+            />
+            Continue with Google
+        </Button>
     );
-};
+}
 
 export default GoogleLoginBTN;
