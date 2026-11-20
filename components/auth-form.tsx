@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { type FormEvent, useState } from "react"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -16,7 +16,9 @@ import {
 
 import GoogleLoginBTN from "@/components/socialLogins/google/GoogleLoginBTN"
 import { authClient } from "@/lib/auth-client"
+import { getErrorMessage } from "@/lib/error-message"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 type AuthFormProps = {
   mode: "login" | "register"
@@ -26,13 +28,11 @@ export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const isRegister = mode === "register"
   const canSelfAssignAdmin = /* process.env.NODE_ENV === "development" */ true;
-  const [formStatus, setFormStatus] = useState("")
   const [showPassword, setShowPassword] = useState(false)
 
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setFormStatus("")
 
     const formValues = Object.fromEntries(
       new FormData(event.currentTarget).entries()
@@ -46,7 +46,9 @@ export function AuthForm({ mode }: AuthFormProps) {
         role !== "recruiter" &&
         !(canSelfAssignAdmin && role === "admin")
       ) {
-        setFormStatus("Choose a valid account type.")
+        toast.error("Invalid account type", {
+          description: "Choose a valid account type and try again.",
+        })
         return
       }
 
@@ -57,12 +59,20 @@ export function AuthForm({ mode }: AuthFormProps) {
         role,
         fetchOptions: {
           onSuccess: () => {
+            toast.success("Account created", {
+              description: "Welcome to HireLoop.",
+            })
             router.push('/');
             router.refresh();
           },
           onError: (error) => {
             console.error("Registration failed:", error)
-            setFormStatus("Unable to create your account. Please try again.")
+            toast.error("Registration failed", {
+              description: getErrorMessage(
+                error,
+                "Unable to create your account. Please try again."
+              ),
+            })
           }
         }
       })
@@ -73,12 +83,20 @@ export function AuthForm({ mode }: AuthFormProps) {
       password: formValues.password as string,
       fetchOptions: {
         onSuccess: () => {
+          toast.success("Signed in", {
+            description: "Welcome back to HireLoop.",
+          })
           router.push('/');
           router.refresh();
         },
         onError: (error) => {
           console.error("Sign in failed:", error)
-          setFormStatus("Unable to sign in. Check your details and try again.")
+          toast.error("Sign in failed", {
+            description: getErrorMessage(
+              error,
+              "Unable to sign in. Check your details and try again."
+            ),
+          })
         }
       }
     });
@@ -288,15 +306,6 @@ export function AuthForm({ mode }: AuthFormProps) {
             {isRegister ? "Create account" : "Sign in"}
             <ArrowRight aria-hidden="true" className="size-4" />
           </button>
-
-
-          <p
-            aria-live="polite"
-            className="min-h-5 text-center text-xs text-red-300"
-            role={formStatus ? "alert" : undefined}
-          >
-            {formStatus}
-          </p>
         </form>
 
         <div className="my-5 flex items-center gap-3">

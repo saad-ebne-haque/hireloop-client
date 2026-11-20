@@ -16,8 +16,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { authClient } from "@/lib/auth-client"
+import { authClient, GOOGLE_SIGN_IN_PENDING_KEY } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 const navLinks = [
   { href: "/jobs", label: "Browse Jobs" },
@@ -31,6 +32,32 @@ export function Navbar() {
     authClient.useSession()
   const [open, setOpen] = React.useState(false)
   const user = session?.user
+
+  React.useEffect(() => {
+    if (isPending) {
+      return
+    }
+
+    const googleSignInPending = window.sessionStorage.getItem(
+      GOOGLE_SIGN_IN_PENDING_KEY
+    )
+
+    if (!googleSignInPending) {
+      return
+    }
+
+    window.sessionStorage.removeItem(GOOGLE_SIGN_IN_PENDING_KEY)
+
+    if (user) {
+      toast.success("Google sign-in successful", {
+        description: "Welcome to HireLoop.",
+      })
+    } else {
+      toast.error("Google sign-in failed", {
+        description: "Google sign-in could not be completed. Please try again.",
+      })
+    }
+  }, [isPending, user])
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`)

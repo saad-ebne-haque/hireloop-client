@@ -3,21 +3,41 @@
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
+import { authClient, GOOGLE_SIGN_IN_PENDING_KEY } from "@/lib/auth-client";
+import { getErrorMessage } from "@/lib/error-message";
+import { toast } from "sonner";
 
 function GoogleLoginBTN() {
 
     const handleGoogleLogin = async () => {
+        window.sessionStorage.setItem(GOOGLE_SIGN_IN_PENDING_KEY, "true")
 
-        const { data, error } = await authClient.signIn.social({
-            provider: 'google',
-            callbackURL: '/'
-        });
-        
-        if (error) {
-            console.log(error);
-        } else {
-            console.log(data);
+        try {
+            const { error } = await authClient.signIn.social({
+                provider: 'google',
+                callbackURL: '/',
+                errorCallbackURL: '/',
+            });
+
+            if (error) {
+                window.sessionStorage.removeItem(GOOGLE_SIGN_IN_PENDING_KEY)
+                console.error("Google sign-in failed:", error)
+                toast.error("Google sign-in failed", {
+                    description: getErrorMessage(
+                        error,
+                        "Unable to continue with Google. Please try again."
+                    ),
+                })
+            }
+        } catch (error) {
+            window.sessionStorage.removeItem(GOOGLE_SIGN_IN_PENDING_KEY)
+            console.error("Google sign-in failed:", error)
+            toast.error("Google sign-in failed", {
+                description: getErrorMessage(
+                    error,
+                    "Unable to continue with Google. Please try again."
+                ),
+            })
         }
     }
 

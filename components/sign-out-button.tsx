@@ -5,7 +5,9 @@ import { LogOut } from "lucide-react"
 
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { authClient } from "@/lib/auth-client"
+import { getErrorMessage } from "@/lib/error-message"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 type SignOutButtonProps = {
   onClick?: () => void
@@ -13,7 +15,8 @@ type SignOutButtonProps = {
 
 export function SignOutButton({ onClick }: SignOutButtonProps) {
   const [isSigningOut, setIsSigningOut] = useState(false)
-const router = useRouter();
+  const router = useRouter()
+
   async function handleSignOut() {
     setIsSigningOut(true)
 
@@ -21,20 +24,31 @@ const router = useRouter();
       await authClient.signOut({
         fetchOptions: {
           onSuccess: () => {
-            console.log("Signed out successfully");
-            router.push('/login');
+            toast.success("Signed out", {
+              description: "You have signed out successfully.",
+            })
+            router.push("/login")
+            onClick?.()
           },
           onError: (error) => {
             console.error("Sign out error:", error);
+            toast.error("Sign out failed", {
+              description: getErrorMessage(
+                error,
+                "Unable to sign out. Please try again."
+              ),
+            })
           }
         }
       })
-
-
-
-      onClick?.()
     } catch (error) {
       console.error("Sign out failed:", error)
+      toast.error("Sign out failed", {
+        description: getErrorMessage(
+          error,
+          "Unable to sign out. Please try again."
+        ),
+      })
     } finally {
       setIsSigningOut(false)
     }
