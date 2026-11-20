@@ -5,6 +5,8 @@ import Link from "next/link"
 import {
   ArrowRight,
   BriefcaseBusiness,
+  Eye,
+  EyeOff,
   LockKeyhole,
   Mail,
   Shield,
@@ -25,6 +27,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const isRegister = mode === "register"
   const canSelfAssignAdmin = /* process.env.NODE_ENV === "development" */ true;
   const [formStatus, setFormStatus] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
 
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -253,14 +256,28 @@ export function AuthForm({ mode }: AuthFormProps) {
                 autoComplete={
                   isRegister ? "new-password" : "current-password"
                 }
-                className="h-12 w-full rounded-xl border border-white/10 bg-black/20 pr-4 pl-11 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-brand/70 focus:ring-2 focus:ring-brand/20"
+                className="h-12 w-full rounded-xl border border-white/10 bg-black/20 pr-12 pl-11 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-brand/70 focus:ring-2 focus:ring-brand/20"
                 id="password"
                 minLength={8}
                 name="password"
                 placeholder="At least 8 characters"
                 required
-                type="password"
+                type={showPassword ? "text" : "password"}
               />
+              <button
+                aria-controls="password"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+                className="absolute top-1/2 right-3.5 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-white/45 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                onClick={() => setShowPassword((visible) => !visible)}
+                type="button"
+              >
+                {showPassword ? (
+                  <EyeOff aria-hidden="true" className="size-[18px]" />
+                ) : (
+                  <Eye aria-hidden="true" className="size-[18px]" />
+                )}
+              </button>
             </div>
           </div>
 
