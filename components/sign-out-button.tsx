@@ -5,6 +5,7 @@ import { LogOut } from "lucide-react"
 
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { authClient } from "@/lib/auth-client"
+import { useRouter } from "next/navigation"
 
 type SignOutButtonProps = {
   onClick?: () => void
@@ -12,17 +13,24 @@ type SignOutButtonProps = {
 
 export function SignOutButton({ onClick }: SignOutButtonProps) {
   const [isSigningOut, setIsSigningOut] = useState(false)
-
+const router = useRouter();
   async function handleSignOut() {
     setIsSigningOut(true)
 
     try {
-      const { error } = await authClient.signOut()
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            console.log("Signed out successfully");
+            router.push('/login');
+          },
+          onError: (error) => {
+            console.error("Sign out error:", error);
+          }
+        }
+      })
 
-      if (error) {
-        console.error("Sign out failed:", error)
-        return
-      }
+
 
       onClick?.()
     } catch (error) {

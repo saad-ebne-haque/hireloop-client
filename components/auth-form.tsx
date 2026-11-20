@@ -39,12 +39,22 @@ export function AuthForm({ mode }: AuthFormProps) {
           }
         }
       })
-
-
-
-
       return;
     }
+    await authClient.signIn.email({
+      email: formValues.email as string,
+      password: formValues.password as string,
+      fetchOptions: {
+        onSuccess: (data) => {
+          console.log('success', data);
+          router.push('/');
+          router.refresh();
+        },
+        onError: (error) => {
+          console.error('error', error);
+        }
+      }
+    });
   }
 
   return (
