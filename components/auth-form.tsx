@@ -1,12 +1,20 @@
 "use client"
 
-import { type FormEvent } from "react"
+import { useState, type FormEvent } from "react"
 import Link from "next/link"
-import { ArrowRight, BriefcaseBusiness, LockKeyhole, Mail, UserRound } from "lucide-react"
+import {
+  ArrowRight,
+  BriefcaseBusiness,
+  LockKeyhole,
+  Mail,
+  Shield,
+  UserRound,
+  UsersRound,
+} from "lucide-react"
 
 import GoogleLoginBTN from "@/components/socialLogins/google/GoogleLoginBTN"
 import { authClient } from "@/lib/auth-client"
-import { redirect, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 type AuthFormProps = {
   mode: "login" | "register"
@@ -15,27 +23,43 @@ type AuthFormProps = {
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const isRegister = mode === "register"
+  const canSelfAssignAdmin = /* process.env.NODE_ENV === "development" */ true;
+  const [formStatus, setFormStatus] = useState("")
 
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setFormStatus("")
+
     const formValues = Object.fromEntries(
       new FormData(event.currentTarget).entries()
     )
 
     if (isRegister) {
+      const role = formValues.role
+
+      if (
+        role !== "seeker" &&
+        role !== "recruiter" &&
+        !(canSelfAssignAdmin && role === "admin")
+      ) {
+        setFormStatus("Choose a valid account type.")
+        return
+      }
+
       await authClient.signUp.email({
         email: formValues.email as string,
         password: formValues.password as string,
         name: formValues.fullName as string,
+        role,
         fetchOptions: {
-          onSuccess: (data) => {
-            console.log('success', data);
+          onSuccess: () => {
             router.push('/');
             router.refresh();
           },
           onError: (error) => {
-            console.error('error', error);
+            console.error("Registration failed:", error)
+            setFormStatus("Unable to create your account. Please try again.")
           }
         }
       })
@@ -45,13 +69,13 @@ export function AuthForm({ mode }: AuthFormProps) {
       email: formValues.email as string,
       password: formValues.password as string,
       fetchOptions: {
-        onSuccess: (data) => {
-          console.log('success', data);
+        onSuccess: () => {
           router.push('/');
           router.refresh();
         },
         onError: (error) => {
-          console.error('error', error);
+          console.error("Sign in failed:", error)
+          setFormStatus("Unable to sign in. Check your details and try again.")
         }
       }
     });
@@ -108,28 +132,85 @@ export function AuthForm({ mode }: AuthFormProps) {
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           {isRegister && (
-            <div>
-              <label
-                className="mb-2 block text-sm font-medium text-white/80"
-                htmlFor="fullName"
-              >
-                Full name
-              </label>
-              <div className="relative">
-                <UserRound
-                  aria-hidden="true"
-                  className="absolute top-1/2 left-3.5 size-[18px] -translate-y-1/2 text-white/40"
-                />
-                <input
-                  autoComplete="name"
-                  className="h-12 w-full rounded-xl border border-white/10 bg-black/20 pr-4 pl-11 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-brand/70 focus:ring-2 focus:ring-brand/20"
-                  id="fullName"
-                  name="fullName"
-                  placeholder="Your name"
-                  required
-                />
+            <>
+              <div>
+                <label
+                  className="mb-2 block text-sm font-medium text-white/80"
+                  htmlFor="fullName"
+                >
+                  Full name
+                </label>
+                <div className="relative">
+                  <UserRound
+                    aria-hidden="true"
+                    className="absolute top-1/2 left-3.5 size-[18px] -translate-y-1/2 text-white/40"
+                  />
+                  <input
+                    autoComplete="name"
+                    className="h-12 w-full rounded-xl border border-white/10 bg-black/20 pr-4 pl-11 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-brand/70 focus:ring-2 focus:ring-brand/20"
+                    id="fullName"
+                    name="fullName"
+                    placeholder="Your name"
+                    required
+                  />
+                </div>
               </div>
-            </div>
+
+              <fieldset className="space-y-2">
+                <legend className="mb-2 text-sm font-medium text-white/80">
+                  Joining HireLoop as
+                </legend>
+                <div className="grid grid-cols-3 gap-2">
+                  <label className="relative">
+                    <input
+                      className="peer sr-only"
+                      defaultChecked
+                      name="role"
+                      required
+                      type="radio"
+                      value="seeker"
+                    />
+                    <span className="flex min-h-[58px] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-white/10 bg-black/20 px-2 py-2 text-center text-[11px] font-medium leading-4 text-white/75 transition peer-checked:border-brand/70 peer-checked:bg-brand/10 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#19191d]">
+                      <UsersRound aria-hidden="true" className="size-4" />
+                      Job Seeker
+                    </span>
+                  </label>
+                  <label className="relative">
+                    <input
+                      className="peer sr-only"
+                      name="role"
+                      type="radio"
+                      value="recruiter"
+                    />
+                    <span className="flex min-h-[58px] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-white/10 bg-black/20 px-2 py-2 text-center text-[11px] font-medium leading-4 text-white/75 transition peer-checked:border-brand/70 peer-checked:bg-brand/10 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#19191d]">
+                      <UserRound aria-hidden="true" className="size-4" />
+                      Recruiter
+                    </span>
+                  </label>
+                  <label className="relative cursor-not-allowed">
+                    <input
+                      className="peer sr-only"
+                      disabled={!canSelfAssignAdmin}
+                      name="role"
+                      type="radio"
+                      value="admin"
+                    />
+                    <span className={`flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-xl border border-white/10 bg-black/20 px-2 py-2 text-center text-[11px] font-medium leading-4 transition ${canSelfAssignAdmin
+                      ? "cursor-pointer text-white/75 peer-checked:border-brand/70 peer-checked:bg-brand/10 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#19191d]"
+                      : "cursor-not-allowed text-white/40 opacity-60"
+                      }`}>
+                      <Shield aria-hidden="true" className="size-4" />
+                      Admin
+                    </span>
+                  </label>
+                </div>
+                <p className="text-xs text-white/45">
+                  {canSelfAssignAdmin
+                    ? "Admin signup is available in development only."
+                    : "Admin access is assigned separately."}
+                </p>
+              </fieldset>
+            </>
           )}
 
           <div>
@@ -192,6 +273,13 @@ export function AuthForm({ mode }: AuthFormProps) {
           </button>
 
 
+          <p
+            aria-live="polite"
+            className="min-h-5 text-center text-xs text-red-300"
+            role={formStatus ? "alert" : undefined}
+          >
+            {formStatus}
+          </p>
         </form>
 
         <div className="my-5 flex items-center gap-3">
