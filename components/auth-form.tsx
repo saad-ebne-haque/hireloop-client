@@ -1,28 +1,50 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { type FormEvent } from "react"
 import Link from "next/link"
 import { ArrowRight, BriefcaseBusiness, LockKeyhole, Mail, UserRound } from "lucide-react"
 
 import GoogleLoginBTN from "@/components/socialLogins/google/GoogleLoginBTN"
+import { authClient } from "@/lib/auth-client"
+import { redirect, useRouter } from "next/navigation"
 
 type AuthFormProps = {
   mode: "login" | "register"
 }
 
 export function AuthForm({ mode }: AuthFormProps) {
+  const router = useRouter();
   const isRegister = mode === "register"
-  const [status, setStatus] = useState("")
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const formValues = Object.fromEntries(
       new FormData(event.currentTarget).entries()
     )
 
-    setStatus(
-      `Collected ${Object.keys(formValues).length} fields locally. Authentication will be connected later.`
-    )
+    if (isRegister) {
+      await authClient.signUp.email({
+        email: formValues.email as string,
+        password: formValues.password as string,
+        name: formValues.fullName as string,
+        fetchOptions: {
+          onSuccess: (data) => {
+            console.log('success', data);
+            router.push('/');
+            router.refresh();
+          },
+          onError: (error) => {
+            console.error('error', error);
+          }
+        }
+      })
+
+
+
+
+      return;
+    }
   }
 
   return (
@@ -55,8 +77,8 @@ export function AuthForm({ mode }: AuthFormProps) {
           <Link
             aria-current={!isRegister ? "page" : undefined}
             className={`rounded-lg px-3 py-2.5 text-center text-sm font-semibold transition-colors ${!isRegister
-                ? "bg-white/10 text-white shadow-sm"
-                : "text-white/55 hover:text-white"
+              ? "bg-white/10 text-white shadow-sm"
+              : "text-white/55 hover:text-white"
               }`}
             href="/login"
           >
@@ -65,8 +87,8 @@ export function AuthForm({ mode }: AuthFormProps) {
           <Link
             aria-current={isRegister ? "page" : undefined}
             className={`rounded-lg px-3 py-2.5 text-center text-sm font-semibold transition-colors ${isRegister
-                ? "bg-white/10 text-white shadow-sm"
-                : "text-white/55 hover:text-white"
+              ? "bg-white/10 text-white shadow-sm"
+              : "text-white/55 hover:text-white"
               }`}
             href="/register"
           >
@@ -159,9 +181,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             <ArrowRight aria-hidden="true" className="size-4" />
           </button>
 
-          <p aria-live="polite" className="min-h-5 text-center text-xs text-white/55">
-            {status}
-          </p>
+
         </form>
 
         <div className="my-5 flex items-center gap-3">
