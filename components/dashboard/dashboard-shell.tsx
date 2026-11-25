@@ -14,6 +14,7 @@ import {
   Search,
   Settings,
   Users,
+  UserRound,
   type LucideIcon,
 } from "lucide-react"
 import type { CSSProperties } from "react"
@@ -60,10 +61,21 @@ const roleLabels: Record<DashboardRole, string> = {
   admin: "Admin",
 }
 
+function getUserInitials(name: string) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase()
+}
+
 const navigation: Record<DashboardRole, DashboardNavItem[]> = {
   seeker: [
-    { href: "/dashboard/seeker", label: "Overview", icon: LayoutDashboard },
-    { href: "/dashboard/seeker/jobs", label: "Browse Jobs", icon: Search },
+    { href: "/dashboard/seeker", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/dashboard/seeker/jobs", label: "Jobs", icon: Search },
     { href: "/dashboard/seeker/saved", label: "Saved Jobs", icon: Bookmark },
     {
       href: "/dashboard/seeker/applications",
@@ -80,7 +92,7 @@ const navigation: Record<DashboardRole, DashboardNavItem[]> = {
   recruiter: [
     {
       href: "/dashboard/recruiter",
-      label: "Overview",
+      label: "Dashboard",
       icon: LayoutDashboard,
     },
     {
@@ -110,7 +122,7 @@ const navigation: Record<DashboardRole, DashboardNavItem[]> = {
     },
   ],
   admin: [
-    { href: "/dashboard/admin", label: "Overview", icon: LayoutDashboard },
+    { href: "/dashboard/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/dashboard/admin/users", label: "Users", icon: Users },
     { href: "/dashboard/admin/companies", label: "Companies", icon: Building2 },
     {
@@ -132,19 +144,63 @@ type DashboardNavigationProps = {
   pathname: string
 }
 
+type DashboardProfileLinkProps = {
+  role: DashboardRole
+  pathname: string
+  user: DashboardUser
+}
+
+function DashboardProfileLink({
+  role,
+  pathname,
+  user,
+}: DashboardProfileLinkProps) {
+  const { isMobile, setOpenMobile } = useSidebar()
+  const isActive = pathname === "/dashboard/profile"
+  const displayName = user.name.trim() || user.email
+
+  return (
+    <Link
+      aria-current={isActive ? "page" : undefined}
+      className="flex min-w-0 items-center gap-2.5 rounded-lg border border-[#222228] bg-[#141418] px-2.5 py-2.5 transition-colors hover:bg-[#1A1A1F] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9992FF] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-1"
+      href="/dashboard/profile"
+      onClick={() => {
+        if (isMobile) {
+          setOpenMobile(false)
+        }
+      }}
+      title={`${displayName} — ${roleLabels[role]}`}
+    >
+      <Avatar className="size-7 shrink-0" size="sm">
+        {user.image && <AvatarImage alt={displayName} src={user.image} />}
+        <AvatarFallback className="bg-[#222228] text-[10px] font-medium text-[#EDEDEF]">
+          {getUserInitials(displayName)}
+        </AvatarFallback>
+      </Avatar>
+      <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+        <p className="truncate text-xs font-medium text-[#EDEDEF]">
+          {displayName}
+        </p>
+        <p className="truncate text-[10px] text-[#6E6E78]">
+          {roleLabels[role]}
+        </p>
+      </div>
+    </Link>
+  )
+}
+
 function DashboardNavigation({
   role,
   pathname,
 }: DashboardNavigationProps) {
   const { isMobile, setOpenMobile } = useSidebar()
   const items = navigation[role]
+  const activeHref = getActiveDashboardItem(role, pathname).href
 
   return (
     <SidebarMenu aria-label={`${roleLabels[role]} dashboard`}>
       {items.map(({ href, icon: Icon, label }) => {
-        const isActive =
-          pathname === href ||
-          (href !== dashboardRoutes[role] && pathname.startsWith(`${href}/`))
+        const isActive = href === activeHref
 
         return (
           <SidebarMenuItem key={href}>
@@ -163,7 +219,7 @@ function DashboardNavigation({
               }
               tooltip={label}
               className={cn(
-                "h-10 rounded-lg px-3 text-[13px] font-medium text-[#A0A0AB] hover:bg-[#141418] hover:text-[#EDEDEF] data-active:bg-[#635BFF]/15 data-active:text-[#B5B0FF] group-data-[collapsible=icon]:justify-center"
+                "relative h-10 rounded-lg px-3 text-[13px] font-medium text-[#A0A0AB] before:absolute before:top-1/2 before:left-0 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-r before:bg-[#635BFF] before:opacity-0 before:content-[''] hover:bg-[#141418] hover:text-[#EDEDEF] data-active:bg-[#222228] data-active:text-[#EDEDEF] data-active:before:opacity-100 group-data-[collapsible=icon]:justify-center"
               )}
             >
               <Icon aria-hidden="true" className="size-[18px] shrink-0" />
@@ -179,6 +235,14 @@ function DashboardNavigation({
 }
 
 function getActiveDashboardItem(role: DashboardRole, pathname: string) {
+  if (pathname === "/dashboard/profile") {
+    return {
+      href: "/dashboard/profile",
+      label: "Profile",
+      icon: UserRound,
+    }
+  }
+
   return (
     [...navigation[role]]
       .filter(
@@ -228,10 +292,10 @@ export function DashboardShell({
         collapsible="icon"
         className="border-[#222228] bg-[#08080A] text-[#EDEDEF]"
       >
-        <SidebarHeader className="h-[72px] flex-row items-center justify-center border-b border-[#222228] px-4 py-0 group-data-[collapsible=icon]:px-2">
+        <SidebarHeader className="gap-4 px-3 pt-5 pb-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
           <Link
             aria-label="HireLoop dashboard home"
-            className="flex min-w-0 items-center"
+            className="flex min-h-8 min-w-0 items-center px-2"
             href={dashboardRoutes[role]}
           >
             <BriefcaseBusiness
@@ -240,38 +304,44 @@ export function DashboardShell({
             />
             <Image
               alt="HireLoop"
-              className="h-8 w-auto group-data-[collapsible=icon]:hidden"
+              className="h-7 w-auto group-data-[collapsible=icon]:hidden"
               height={44}
               priority
               src="/images/logo.png"
               width={154}
             />
           </Link>
+          {role === "admin" ? (
+            <p className="px-2 text-xs text-[#6E6E78] group-data-[collapsible=icon]:hidden">
+              Admin Console
+            </p>
+          ) : (
+            <DashboardProfileLink
+              pathname={pathname}
+              role={role}
+              user={user}
+            />
+          )}
         </SidebarHeader>
         <SidebarContent>
-          <SidebarGroup className="px-3 py-5">
-            <SidebarGroupLabel className="px-2 text-[11px] font-medium tracking-[0.04em] text-[#6E6E78] uppercase">
-              {roleLabels[role]} workspace
+          <SidebarGroup className="px-3 py-2">
+            <SidebarGroupLabel className="sr-only">
+              {roleLabels[role]} dashboard
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <DashboardNavigation pathname={pathname} role={role} />
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter className="flex-row items-center gap-3 border-t border-[#222228] px-3 py-4 group-data-[collapsible=icon]:justify-center">
-          <Avatar className="size-8 shrink-0 ring-1 ring-white/15" size="sm">
-            {user.image && <AvatarImage alt={user.name} src={user.image} />}
-            <AvatarFallback className="bg-[#222228] text-xs font-semibold text-[#EDEDEF]">
-              {user.name.trim().slice(0, 1).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <p className="truncate text-[13px] font-medium text-[#EDEDEF]">
-              {user.name}
-            </p>
-            <p className="truncate text-xs text-[#6E6E78]">{user.email}</p>
-          </div>
-        </SidebarFooter>
+        {role === "admin" && (
+          <SidebarFooter className="px-3 pb-3">
+            <DashboardProfileLink
+              pathname={pathname}
+              role={role}
+              user={user}
+            />
+          </SidebarFooter>
+        )}
       </Sidebar>
 
       <SidebarInset className="min-h-svh bg-[#08080A] text-[#EDEDEF]">
@@ -290,7 +360,7 @@ export function DashboardShell({
               </h1>
             </div>
           </div>
-          <AccountMenu user={user} />
+          <AccountMenu user={user} profileHref="/dashboard/profile" />
         </header>
         <section className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           {children}

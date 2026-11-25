@@ -24,6 +24,7 @@ type AccountMenuProps = {
     image?: string | null
   }
   mobile?: boolean
+  profileHref?: string
   onDashboardNavigate?: () => void
   onProfileNavigate?: () => void
   onSignOutSelect?: () => void
@@ -32,6 +33,7 @@ type AccountMenuProps = {
 export function AccountMenu({
   user,
   mobile = false,
+  profileHref = "/dashboard/profile",
   onDashboardNavigate,
   onProfileNavigate,
   onSignOutSelect,
@@ -118,7 +120,7 @@ export function AccountMenu({
         <DropdownMenuItem
           className="cursor-pointer rounded-lg px-2.5 py-2 text-white/85 focus:bg-white/10 focus:text-white"
           render={
-            <Link href="/profile" onClick={onProfileNavigate} />
+            <Link href={profileHref} onClick={onProfileNavigate} />
           }
         >
           <UserRound aria-hidden="true" className="size-4" />
