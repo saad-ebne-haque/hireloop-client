@@ -62,7 +62,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             toast.success("Account created", {
               description: "Welcome to HireLoop.",
             })
-            router.push('/');
+            router.push('/dashboard');
             router.refresh();
           },
           onError: (error) => {
@@ -86,7 +86,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           toast.success("Signed in", {
             description: "Welcome back to HireLoop.",
           })
-          router.push('/');
+          router.push('/dashboard');
           router.refresh();
         },
         onError: (error) => {

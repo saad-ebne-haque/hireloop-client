@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ChevronDown, UserRound } from "lucide-react"
+import { ChevronDown, LayoutDashboard, UserRound } from "lucide-react"
 
 import { SignOutButton } from "@/components/sign-out-button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -24,6 +24,7 @@ type AccountMenuProps = {
     image?: string | null
   }
   mobile?: boolean
+  onDashboardNavigate?: () => void
   onProfileNavigate?: () => void
   onSignOutSelect?: () => void
 }
@@ -31,6 +32,7 @@ type AccountMenuProps = {
 export function AccountMenu({
   user,
   mobile = false,
+  onDashboardNavigate,
   onProfileNavigate,
   onSignOutSelect,
 }: AccountMenuProps) {
@@ -104,6 +106,15 @@ export function AccountMenu({
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator className="my-1 bg-white/10" />
+        <DropdownMenuItem
+          className="cursor-pointer rounded-lg px-2.5 py-2 text-white/85 focus:bg-white/10 focus:text-white"
+          render={
+            <Link href="/dashboard" onClick={onDashboardNavigate} />
+          }
+        >
+          <LayoutDashboard aria-hidden="true" className="size-4" />
+          Dashboard
+        </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer rounded-lg px-2.5 py-2 text-white/85 focus:bg-white/10 focus:text-white"
           render={

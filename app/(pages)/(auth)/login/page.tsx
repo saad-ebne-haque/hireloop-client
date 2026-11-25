@@ -7,16 +7,16 @@ import { AuthForm } from "@/components/auth-form"
 import { auth } from "@/lib/auth"
 
 export const metadata: Metadata = {
-  title: "Sign up | HireLoop",
-  description: "Create a HireLoop account and discover your next opportunity.",
+  title: "Sign in | HireLoop",
+  description: "Sign in to your HireLoop account.",
 }
 
-export default async function RegisterPage() {
+export default async function LoginPage() {
   const session = await auth.api.getSession({ headers: await headers() })
 
   if (session) {
-    redirect("/")
+    redirect("/dashboard")
   }
 
-  return <AuthForm mode="register" />
+  return <AuthForm mode="login" />
 }

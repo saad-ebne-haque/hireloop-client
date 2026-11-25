@@ -198,6 +198,7 @@ export function Navbar() {
                 ) : user ? (
                   <AccountMenu
                     mobile
+                    onDashboardNavigate={() => setOpen(false)}
                     onProfileNavigate={() => setOpen(false)}
                     onSignOutSelect={() => setOpen(false)}
                     user={user}
