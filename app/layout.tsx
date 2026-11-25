@@ -1,6 +1,7 @@
 import {
   Geist,
   Geist_Mono,
+  Inter,
   Inter_Tight,
   Manrope,
   Plus_Jakarta_Sans,
@@ -11,6 +12,7 @@ import "./globals.css"
 import { Navbar } from "@/components/navbar"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
@@ -41,6 +43,11 @@ const interTight = Inter_Tight({
   variable: "--font-inter-tight",
 })
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+})
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -56,6 +63,7 @@ export default function RootLayout({
         "font-sans",
         geist.variable,
         manrope.variable,
+        inter.variable,
         spaceMono.variable,
         plusJakartaSans.variable,
         interTight.variable
@@ -63,9 +71,11 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <Navbar />
-          {children}
-          <Toaster />
+          <TooltipProvider>
+            <Navbar />
+            {children}
+            <Toaster />
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

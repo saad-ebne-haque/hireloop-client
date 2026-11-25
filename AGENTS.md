@@ -5,8 +5,10 @@
 - When the user asks for a commit message or says "commit" in a prompt, do not run `git commit`, `git push`, or any other commit/push command.
 - First inspect and understand the current Git changes in the workspace.
 - Generate and return a meaningful, detailed commit message that summarizes the actual changes.
+- Present the commit as copy-ready commands in this exact order: `git add .`, `git commit -m "..."`, then `git push`; make clear which repository directory to run them from.
 - Prefer a concise subject line with a blank line followed by a bulleted or descriptive body.
 - Include affected areas and important implementation or behavior changes; do not invent changes that are not present.
+- Do not include a `Co-authored-by: Copilot` trailer in commit messages.
 - Do not modify files merely to create the commit message unless the user separately asks for code changes.
 
 # This is NOT the Next.js you know

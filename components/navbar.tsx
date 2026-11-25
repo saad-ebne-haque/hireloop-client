@@ -62,6 +62,10 @@ export function Navbar() {
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`)
 
+  if (pathname.startsWith("/dashboard")) {
+    return null
+  }
+
   return (
     <header className="sticky top-0 z-50">
       <div className="mx-auto w-full max-w-[1320px] px-4 pt-4 sm:px-6 sm:pt-5 lg:px-10 lg:pt-6">

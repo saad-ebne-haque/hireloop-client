@@ -2,41 +2,36 @@ import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { auth } from "@/lib/auth"
+import {
+  dashboardRoutes,
+  getDashboardPath,
+  isDashboardRole,
+  type DashboardRole,
+} from "@/lib/dashboard-constants"
 
-export const dashboardRoutes = {
-  seeker: "/dashboard/seeker",
-  recruiter: "/dashboard/recruiter",
-  admin: "/dashboard/admin",
-} as const
+export { getDashboardPath }
 
-export type DashboardRole = keyof typeof dashboardRoutes
-
-export function getDashboardPath(role: unknown): string | null {
-  if (
-    typeof role !== "string" ||
-    !Object.prototype.hasOwnProperty.call(dashboardRoutes, role)
-  ) {
-    return null
-  }
-
-  return dashboardRoutes[role as DashboardRole]
-}
-
-export async function requireDashboardRole(expectedRole: DashboardRole) {
+export async function requireDashboardSession() {
   const session = await auth.api.getSession({ headers: await headers() })
 
   if (!session) {
     redirect("/login")
   }
 
-  const dashboardPath = getDashboardPath(session.user.role)
+  const role = session.user.role
 
-  if (!dashboardPath) {
+  if (!isDashboardRole(role)) {
     redirect("/")
   }
 
-  if (session.user.role !== expectedRole) {
-    redirect(dashboardPath)
+  return { session, role }
+}
+
+export async function requireDashboardRole(expectedRole: DashboardRole) {
+  const { session, role } = await requireDashboardSession()
+
+  if (role !== expectedRole) {
+    redirect(dashboardRoutes[role])
   }
 
   return session
