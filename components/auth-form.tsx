@@ -208,22 +208,20 @@ export function AuthForm({ mode }: AuthFormProps) {
                       Recruiter
                     </span>
                   </label>
-                  <label className="relative cursor-not-allowed">
-                    <input
-                      className="peer sr-only"
-                      disabled={!canSelfAssignAdmin}
-                      name="role"
-                      type="radio"
-                      value="admin"
-                    />
-                    <span className={`flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-xl border border-white/10 bg-black/20 px-2 py-2 text-center text-[11px] font-medium leading-4 transition ${canSelfAssignAdmin
-                      ? "cursor-pointer text-white/75 peer-checked:border-brand/70 peer-checked:bg-brand/10 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#19191d]"
-                      : "cursor-not-allowed text-white/40 opacity-60"
-                      }`}>
-                      <Shield aria-hidden="true" className="size-4" />
-                      Admin
-                    </span>
-                  </label>
+                  {canSelfAssignAdmin && (
+                    <label className="relative">
+                      <input
+                        className="peer sr-only"
+                        name="role"
+                        type="radio"
+                        value="admin"
+                      />
+                      <span className="flex min-h-[58px] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-white/10 bg-black/20 px-2 py-2 text-center text-[11px] font-medium leading-4 text-white/75 transition peer-checked:border-brand/70 peer-checked:bg-brand/10 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#19191d]">
+                        <Shield aria-hidden="true" className="size-4" />
+                        Admin
+                      </span>
+                    </label>
+                  )}
                 </div>
                 <p className="text-xs text-white/45">
                   {canSelfAssignAdmin
