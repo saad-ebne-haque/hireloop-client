@@ -10,7 +10,6 @@ import {
 
 import "./globals.css"
 import { Navbar } from "@/components/navbar"
-import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
@@ -58,6 +57,7 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
       className={cn(
+        "dark",
         "antialiased",
         fontMono.variable,
         "font-sans",
@@ -70,13 +70,11 @@ export default function RootLayout({
       )}
     >
       <body>
-        <ThemeProvider>
-          <TooltipProvider>
-            <Navbar />
-            {children}
-            <Toaster />
-          </TooltipProvider>
-        </ThemeProvider>
+        <TooltipProvider>
+          <Navbar />
+          {children}
+          <Toaster />
+        </TooltipProvider>
       </body>
     </html>
   )

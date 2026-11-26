@@ -27,7 +27,7 @@ type AuthFormProps = {
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const isRegister = mode === "register"
-  const canSelfAssignAdmin = /* process.env.NODE_ENV === "development" */ true;
+  const canSelfAssignAdmin = process.env.NODE_ENV === "development"
   const [showPassword, setShowPassword] = useState(false)
 
 
