@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-const createJob = async (jobPostData: JobPostData, onSuccess: () => void, onError: () => void): Promise<void> => {
+export const createJob = async (jobPostData: JobPostData, onSuccess?: () => void, onError?: () => void): Promise<void> => {
 
     try {
         const res = await fetch(`${baseUrl}/jobs`, {
@@ -23,9 +23,9 @@ const createJob = async (jobPostData: JobPostData, onSuccess: () => void, onErro
         }
         const result = await res.json();
         toast.success(result?.message);
-        onSuccess();
+        onSuccess?.();
     } catch (err) {
         toast.error((err as Error).message);
-        onError();
+        onError?.();
     }
 }

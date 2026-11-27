@@ -38,6 +38,7 @@ import type {
   JobPostData,
   JobType,
 } from "@/types/job-post-data"
+import { createJob } from "@/lib/actions/jobs"
 
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
 const CARD_CLASS_NAME = "border-[#222228] bg-[#0E0E11] text-[#EDEDEF]"
@@ -273,34 +274,9 @@ export function JobPostForm({ recruiterEmail }: JobPostFormProps) {
       const jobPostData = { ...jobDetails, coverImage }
 
       // Send the job data to the API.
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/jobs`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(jobPostData),
-      });
-      const result = (await response.json()) as JobPostResponse | null
-      const responseMessage =
-        typeof result?.message === "string" ? result.message : ""
 
-      if (!response.ok || result?.success !== true) {
-        throw new Error(responseMessage || "Could not post the job.")
-      }
-
-      toast.success("Job posted successfully", {
-        description: responseMessage || "Your job has been published.",
-      })
-      router.push("/dashboard/recruiter/jobs")
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Could not post the job. Please try again."
-
-      setFormError(
-        errorMessage
-      )
-      toast.error("Job post failed", {
-        description: errorMessage,
+      createJob(jobPostData, () => {
+        router.push("/dashboard/recruiter/jobs")
       })
     } finally {
       setIsSubmitting(false)
