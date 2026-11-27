@@ -273,7 +273,7 @@ export function JobPostForm({ recruiterEmail }: JobPostFormProps) {
       const jobPostData = { ...jobDetails, coverImage }
 
       // Send the job data to the API.
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}jobs`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/jobs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(jobPostData),
@@ -285,7 +285,7 @@ export function JobPostForm({ recruiterEmail }: JobPostFormProps) {
       if (!response.ok || result?.success !== true) {
         throw new Error(responseMessage || "Could not post the job.")
       }
-console.log(jobPostData);
+
       toast.success("Job posted successfully", {
         description: responseMessage || "Your job has been published.",
       })
