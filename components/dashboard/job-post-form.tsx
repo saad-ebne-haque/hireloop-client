@@ -31,6 +31,13 @@ import {
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { useRouter } from "next/navigation"
+import { uploadJobCoverImage } from "@/lib/actions/upload-job-cover"
+import type {
+  JobCoverImage,
+  JobPostData,
+  JobType,
+} from "@/types/job-post-data"
 
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
 const CARD_CLASS_NAME = "border-[#222228] bg-[#0E0E11] text-[#EDEDEF]"
@@ -53,50 +60,8 @@ const JOB_TYPES = [
 
 const CURRENCIES = ["USD", "BDT", "EUR", "GBP"] as const
 
-type JobType = (typeof JOB_TYPES)[number]["value"]
-type Currency = (typeof CURRENCIES)[number]
-
-type JobCoverImage = {
-  url: string
-  deleteUrl: string | null
-}
-
-export type JobPostFormData = {
-  title: string
-  category: string
-  jobType: JobType
-  isActive: boolean
-  isApproved: boolean
-  salary: {
-    minimum: number
-    maximum: number
-    currency: Currency
-  }
-  location: {
-    city: string
-    country: string
-    isRemote: boolean
-  }
-  applicationDeadline: string
-  description: {
-    responsibilities: string
-    requirements: string
-    benefits: string
-  }
-  coverImage: JobCoverImage | null
-  company: {
-    recruiterEmail: string
-  }
-}
-
 type JobPostFormProps = {
   recruiterEmail: string
-}
-
-type ImageUploadResponse = {
-  url?: unknown
-  deleteUrl?: unknown
-  error?: unknown
 }
 
 type JobPostResponse = {
@@ -146,7 +111,7 @@ export function collectJobPostFormData(
   formData: FormData,
   coverImage: JobCoverImage | null,
   recruiterEmail: string
-): JobPostFormData {
+): JobPostData {
   const title = readFormText(formData, "title")
   const category = readFormText(formData, "category")
   const jobTypeValue = readFormText(formData, "jobType")
@@ -213,34 +178,6 @@ export function collectJobPostFormData(
   }
 }
 
-async function uploadJobCoverImage(file: File): Promise<JobCoverImage> {
-  const imageFormData = new FormData()
-  imageFormData.set("image", file)
-
-  const response = await fetch("/api/uploads/job-cover", {
-    method: "POST",
-    body: imageFormData,
-  })
-  const result = (await response.json()) as ImageUploadResponse
-
-  if (!response.ok) {
-    throw new Error(
-      typeof result.error === "string"
-        ? result.error
-        : "The image upload failed. Please try again."
-    )
-  }
-
-  if (typeof result.url !== "string" || typeof result.deleteUrl !== "string") {
-    throw new Error("The image upload response is missing image links.")
-  }
-
-  return {
-    url: result.url,
-    deleteUrl: result.deleteUrl,
-  }
-}
-
 export function JobPostForm({ recruiterEmail }: JobPostFormProps) {
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null)
   const [coverImageUrl, setCoverImageUrl] = useState("")
@@ -254,7 +191,7 @@ export function JobPostForm({ recruiterEmail }: JobPostFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const isRemotePosition = isRemote || jobType === "remote"
   const imagePreview = imagePreviewUrl || coverImageUrl
-
+  const router = useRouter();
   useEffect(() => {
     if (!imagePreviewUrl) {
       return
@@ -348,10 +285,11 @@ export function JobPostForm({ recruiterEmail }: JobPostFormProps) {
       if (!response.ok || result?.success !== true) {
         throw new Error(responseMessage || "Could not post the job.")
       }
-
+console.log(jobPostData);
       toast.success("Job posted successfully", {
         description: responseMessage || "Your job has been published.",
       })
+      router.push("/dashboard/recruiter/jobs")
     } catch (error) {
       const errorMessage =
         error instanceof Error
